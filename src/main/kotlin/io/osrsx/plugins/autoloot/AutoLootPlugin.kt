@@ -3,11 +3,10 @@ package io.osrsx.plugins.autoloot
 import io.osrsx.config.PluginConfig
 import io.osrsx.config.isTrue
 import io.osrsx.plugin.Plugin
-import io.osrsx.plugin.PluginDescriptor
 
 /**
- * Picks up configured ground items within a radius. A minimal, fully SDK-authored plugin: a
- * [PluginDescriptor] the host's `PluginManager` discovers by classpath scan, per-plugin settings via a
+ * Picks up configured ground items within a radius. A minimal, fully SDK-authored plugin: the host's `PluginManager` discovers it via the generated
+ * jar manifest (`Osrsx-Plugin-Main`), per-plugin settings via a
  * [PluginConfig], and the game API through the `Plugin` base accessors (`login`/`players`/`groundItems`).
  *
  * This is also a reference example of an **extracted osrsx plugin** — it started life as a built-in and
@@ -15,13 +14,6 @@ import io.osrsx.plugin.PluginDescriptor
  * `io.osrsx.plugin` Gradle plugin. Inert until enabled from the Plugin Manager; runs concurrently with
  * any other plugin.
  */
-@PluginDescriptor(
-    name = "Auto Loot",
-    description = "Picks up configured ground items within a radius.",
-    author = "osrsx",
-    tags = ["loot", "pickup", "utility"],
-    defaultPriority = 2,
-)
 class AutoLootPlugin : Plugin() {
 
     /** Per-plugin settings, persisted under config group "autoloot". */
