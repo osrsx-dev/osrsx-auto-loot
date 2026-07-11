@@ -2,6 +2,8 @@ apply plugin: 'io.osrsx.plugin'
 
 osrsxPlugin {
     id = 'auto-loot'
+    main = 'io.osrsx.plugins.autoloot.AutoLootPlugin'
+    defaultPriority = 2
     group = 'io.osrsx.plugins'
     version = '1.2.0'
     name = 'Auto Loot'
