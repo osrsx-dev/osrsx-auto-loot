@@ -1,8 +1,8 @@
 package io.osrsx.plugins.autoloot
 
+import io.osrsx.plugin.ClientThreadPlugin
 import io.osrsx.plugin.PluginSettings
 import io.osrsx.plugin.isTrue
-import io.osrsx.plugin.Plugin
 
 /**
  * Picks up configured ground items within a radius. A minimal, fully SDK-authored plugin: the host's `PluginManager` discovers it via the generated
@@ -14,7 +14,7 @@ import io.osrsx.plugin.Plugin
  * `io.osrsx.plugin` Gradle plugin. Inert until enabled from the Plugin Manager; runs concurrently with
  * any other plugin.
  */
-class AutoLootPlugin : Plugin() {
+class AutoLootPlugin : ClientThreadPlugin() {
 
     /** Per-plugin settings, persisted under config group "autoloot". */
     object Config : PluginSettings("autoloot") {
@@ -26,15 +26,17 @@ class AutoLootPlugin : Plugin() {
 
     override fun settings() = Config
 
-    override fun onLoop(): Long {
-        if (!Config.pickup || !login.isLoggedIn()) return 600
+    /** SENSE + DECIDE — client thread, per game tick: the ground-item query reads live, exact scene
+     *  state (no snapshot, no hops). The blocking pickup click is offered as the intent and executes
+     *  on the actuator drain thread; re-offers each tick keep targeting the CURRENT nearest item. */
+    override fun onClientTick() {
+        if (!Config.pickup || !login.isLoggedIn()) return
         val wanted = Config.lootItems.split(",").map { it.trim().lowercase() }.filter { it.isNotEmpty() }
-        if (wanted.isEmpty()) return 600
+        if (wanted.isEmpty()) return
         val target = groundItems.query()
             .within(Config.radius)
             .keepIf { it.name()?.lowercase() in wanted }
-            .nearest() ?: return 600
-        target.interact("Take")
-        return 800
+            .nearest() ?: return
+        offer(0, "take ${target.name()}") { target.interact("Take") }
     }
 }
